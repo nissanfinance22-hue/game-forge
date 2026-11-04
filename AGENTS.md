@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Game logic lives in src/game as decoupled modules (Grid/Movement/Combat/EnemyAI/Turn/Character/MapRenderer/BattleUI/GridCalibration); no backend — the prototype is client-only by request.
