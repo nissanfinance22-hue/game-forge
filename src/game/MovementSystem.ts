@@ -1,7 +1,7 @@
 import { getTile, key } from "./GridSystem";
 import type { Character, MapData, Tile } from "./types";
 
-const DIRS = [
+const DIRS: [number, number][] = [
   [1, 0],
   [-1, 0],
   [0, 1],
@@ -42,7 +42,7 @@ export function buildPath(parent: Map<string, string>, from: string, to: string)
   const path: { x: number; y: number }[] = [];
   let cur: string | undefined = to;
   while (cur && cur !== from) {
-    const [x, y] = cur.split(",").map(Number);
+    const [x = 0, y = 0] = cur.split(",").map(Number);
     path.unshift({ x, y });
     cur = parent.get(cur);
   }

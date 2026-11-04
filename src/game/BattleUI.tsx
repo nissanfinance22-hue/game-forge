@@ -1,7 +1,7 @@
 import type { Character } from "./types";
 import type { Mode } from "./TurnSystem";
 
-export function TopBar({ turn, active }: { turn: number; active?: Character }) {
+export function TopBar({ turn, active }: { turn: number; active?: Character | undefined }) {
   return (
     <div className="game-panel flex items-center gap-4 px-4 py-2">
       <h1 className="font-pixel text-[11px] leading-tight text-primary sm:text-xs">THE LEGEND OF MYTHOLOGY HEROES</h1>

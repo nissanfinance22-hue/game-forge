@@ -13,7 +13,7 @@ type Props = {
   attackTiles: string[];
   targetIds: string[];
   selectedId: string | null;
-  activeId?: string;
+  activeId?: string | undefined;
   popups: Popup[];
   onPopupDone: (id: number) => void;
   onTileClick: (x: number, y: number) => void;
@@ -69,7 +69,7 @@ export function MapRenderer(p: Props) {
               />
               {p.calibrating && (
                 <text x={c.sx} y={c.sy + 5} textAnchor="middle" fontSize={13} fill="var(--foreground)" pointerEvents="none">
-                  {t.terrain[0].toUpperCase()}
+                  {t.terrain.charAt(0).toUpperCase()}
                   {t.height}
                 </text>
               )}
@@ -80,7 +80,7 @@ export function MapRenderer(p: Props) {
       {p.units.map((u) => {
         const t = getTile(map, u.x, u.y)!;
         const { sx, sy } = tileCenter(cfg, { ...t, height: u.z });
-        const s = SPRITES[u.spriteId];
+        const s = SPRITES[u.spriteId] ?? SPRITES.mage!;
         const w = s.frameW * s.scale;
         const h = s.frameH * s.scale;
         const d = s.dirs[u.dir];

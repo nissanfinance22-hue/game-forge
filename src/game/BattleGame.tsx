@@ -65,7 +65,7 @@ function Battle({ map, setMap }: { map: MapData; setMap: (m: MapData) => void })
 
         <div className="pointer-events-none fixed bottom-3 left-3 z-40 flex items-end gap-2 [&>*]:pointer-events-auto">
           {selected && <UnitCard u={selected} />}
-          {b.isPlayerTurn && !calibrating && (
+          {b.isPlayerTurn && b.active && !calibrating && (
             <ActionMenu active={b.active} mode={b.mode} setMode={b.setMode} onWait={b.nextTurn} onEnd={b.nextTurn} />
           )}
         </div>

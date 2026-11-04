@@ -90,7 +90,7 @@ export function useBattle(map: MapData) {
       if (us[i].hp > 0) break;
     }
     if (wrapped) setTurn((t) => t + 1);
-    patch(us[i].id, { hasMoved: false, hasActed: false });
+    patch(us[i]!.id, { hasMoved: false, hasActed: false });
     setActiveIdx(i);
   }, [activeIdx]);
 
@@ -120,7 +120,7 @@ export function useBattle(map: MapData) {
     if (active?.team === "player" && !busy) setLog(`Turno de ${active.name}.`);
   }, [activeIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isPlayerTurn = active?.team === "player" && !busy && !result;
+  const isPlayerTurn: boolean = !!active && active.team === "player" && !busy && !result;
 
   const moveInfo =
     isPlayerTurn && mode === "move" && !active.hasMoved ? reachable(map, active, units) : null;
