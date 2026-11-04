@@ -15,8 +15,8 @@ export function planEnemyTurn(map: MapData, self: Character, units: Character[])
   // 1. Any reachable tile from which a foe can be attacked? pick weakest foe, shortest move
   let best: { k: string; foe: Character; cost: number } | null = null;
   for (const [k, cost] of dist) {
-    const [x, y] = k.split(",").map(Number);
-    const z = map.tiles[y * map.config.cols + x].height;
+    const [x = 0, y = 0] = k.split(",").map(Number);
+    const z = map.tiles[y * map.config.cols + x]?.height ?? 0;
     for (const f of foes) {
       if (!canAttack({ x, y, z, attackRange: self.attackRange }, f)) continue;
       if (!best || f.hp < best.foe.hp || (f.hp === best.foe.hp && cost < best.cost))
