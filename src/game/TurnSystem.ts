@@ -49,8 +49,9 @@ export function useBattle(map: MapData) {
       if (!path.length) return;
       setAnim(id, "walk");
       for (const step of path) {
-        const u = unitsRef.current.find((v) => v.id === id)!;
-        const t = getTile(map, step.x, step.y)!;
+        const u = unitsRef.current.find((v) => v.id === id);
+        const t = getTile(map, step.x, step.y);
+        if (!u || !t) return;
         patch(id, { x: step.x, y: step.y, z: t.height, dir: dirTowards(u, step) });
         await sleep(STEP_MS);
       }
@@ -60,8 +61,9 @@ export function useBattle(map: MapData) {
   );
 
   const attack = useCallback(async (attackerId: string, targetId: string) => {
-    const a = unitsRef.current.find((u) => u.id === attackerId)!;
-    const t = unitsRef.current.find((u) => u.id === targetId)!;
+    const a = unitsRef.current.find((u) => u.id === attackerId);
+    const t = unitsRef.current.find((u) => u.id === targetId);
+    if (!a || !t) return;
     patch(attackerId, { dir: dirTowards(a, t), anim: "attack" });
     await sleep(350);
     const dmg = computeDamage(a, t);
@@ -87,10 +89,12 @@ export function useBattle(map: MapData) {
     for (let n = 0; n < us.length; n++) {
       i = (i + 1) % us.length;
       if (i === 0) wrapped = true;
-      if (us[i].hp > 0) break;
+      if ((us[i]?.hp ?? 0) > 0) break;
     }
     if (wrapped) setTurn((t) => t + 1);
-    patch(us[i]!.id, { hasMoved: false, hasActed: false });
+    const next = us[i];
+    if (!next) return;
+    patch(next.id, { hasMoved: false, hasActed: false });
     setActiveIdx(i);
   }, [activeIdx]);
 
@@ -104,7 +108,9 @@ export function useBattle(map: MapData) {
       setLog(`Turno de ${u.name}...`);
       setSelectedId(u.id);
       await sleep(600);
-      const plan = planEnemyTurn(map, unitsRef.current.find((v) => v.id === u.id)!, unitsRef.current);
+      const enemy = unitsRef.current.find((v) => v.id === u.id);
+      if (!enemy) return;
+      const plan = planEnemyTurn(map, enemy, unitsRef.current);
       await walk(u.id, plan.path);
       if (my !== runId.current) return;
       await sleep(250);
@@ -123,14 +129,14 @@ export function useBattle(map: MapData) {
   const isPlayerTurn: boolean = !!active && active.team === "player" && !busy && !result;
 
   const moveInfo =
-    isPlayerTurn && mode === "move" && !active.hasMoved ? reachable(map, active, units) : null;
-  const moveTiles = moveInfo ? [...moveInfo.dist.keys()].filter((k) => k !== key(active.x, active.y)) : [];
+    active && isPlayerTurn && mode === "move" && !active.hasMoved ? reachable(map, active, units) : null;
+  const moveTiles = moveInfo && active ? [...moveInfo.dist.keys()].filter((k) => k !== key(active.x, active.y)) : [];
   const attackTargets =
-    isPlayerTurn && mode === "attack" && !active.hasActed
+    active && isPlayerTurn && mode === "attack" && !active.hasActed
       ? units.filter((t) => t.team !== active.team && canAttack(active, t))
       : [];
   const attackTiles: string[] = [];
-  if (isPlayerTurn && mode === "attack" && !active.hasActed) {
+  if (active && isPlayerTurn && mode === "attack" && !active.hasActed) {
     for (const t of map.tiles) {
       const d = Math.abs(t.x - active.x) + Math.abs(t.y - active.y);
       if (d >= 1 && d <= active.attackRange && t.walkable) attackTiles.push(key(t.x, t.y));
@@ -138,15 +144,15 @@ export function useBattle(map: MapData) {
   }
 
   const onTileClick = async (x: number, y: number) => {
-    if (!isPlayerTurn) return;
+    if (!active || !isPlayerTurn) return;
     const k = key(x, y);
     if (mode === "move" && moveInfo?.dist.has(k) && k !== key(active.x, active.y)) {
       setBusy(true);
       setMode("idle");
       await walk(active.id, buildPath(moveInfo.parent, key(active.x, active.y), k));
       setBusy(false);
-      const after = unitsRef.current.find((u) => u.id === active.id)!;
-      if (!after.hasActed) setMode("attack");
+      const after = unitsRef.current.find((u) => u.id === active.id);
+      if (after && !after.hasActed) setMode("attack");
       return;
     }
     const u = units.find((v) => v.x === x && v.y === y && v.hp > 0);
@@ -156,17 +162,17 @@ export function useBattle(map: MapData) {
   const onUnitClick = async (id: string) => {
     const u = units.find((v) => v.id === id);
     if (!u) return;
-    if (isPlayerTurn && mode === "attack" && attackTargets.some((t) => t.id === id)) {
+    if (active && isPlayerTurn && mode === "attack" && attackTargets.some((t) => t.id === id)) {
       setBusy(true);
       setMode("idle");
       await attack(active.id, id);
       setBusy(false);
-      const after = unitsRef.current.find((v) => v.id === active.id)!;
-      if (!after.hasMoved) setMode("move");
+      const after = unitsRef.current.find((v) => v.id === active.id);
+      if (after && !after.hasMoved) setMode("move");
       return;
     }
     setSelectedId(id);
-    if (isPlayerTurn && id === active.id) setMode(active.hasMoved ? (active.hasActed ? "idle" : "attack") : "move");
+    if (active && isPlayerTurn && id === active.id) setMode(active.hasMoved ? (active.hasActed ? "idle" : "attack") : "move");
   };
 
   const restart = () => {

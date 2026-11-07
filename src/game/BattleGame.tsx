@@ -4,6 +4,7 @@ import { GridCalibration } from "./GridCalibration";
 import { ActionMenu, ResultScreen, TopBar, UnitCard } from "./BattleUI";
 import { DEFAULT_MAP, MAP_IMAGE_SIZE, STORAGE_KEY } from "./mapData";
 import { useBattle } from "./TurnSystem";
+import { ElementalSynergy } from "./ElementalSynergy";
 import type { MapData } from "./types";
 
 function Battle({ map, setMap }: { map: MapData; setMap: (m: MapData) => void }) {
@@ -27,6 +28,7 @@ function Battle({ map, setMap }: { map: MapData; setMap: (m: MapData) => void })
     <div className="flex h-screen flex-col gap-2 overflow-hidden p-2">
       <div className="flex flex-wrap items-center gap-2">
         <TopBar turn={b.turn} active={b.active} />
+        <ElementalSynergy />
         <div className="game-panel flex items-center">
           <button className="px-3 py-1 hover:bg-secondary" onClick={() => zoom(-0.1)} aria-label="Diminuir zoom">−</button>
           <span className="w-14 text-center">{Math.round(scale * 100)}%</span>

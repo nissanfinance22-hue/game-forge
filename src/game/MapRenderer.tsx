@@ -78,9 +78,11 @@ export function MapRenderer(p: Props) {
         })}
       </svg>
       {p.units.map((u) => {
-        const t = getTile(map, u.x, u.y)!;
+        const t = getTile(map, u.x, u.y);
+        if (!t) return null;
         const { sx, sy } = tileCenter(cfg, { ...t, height: u.z });
-        const s = SPRITES[u.spriteId] ?? SPRITES.mage!;
+        const s = SPRITES[u.spriteId] ?? SPRITES['mage'];
+        if (!s) return null;
         const w = s.frameW * s.scale;
         const h = s.frameH * s.scale;
         const d = s.dirs[u.dir];

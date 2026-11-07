@@ -10,3 +10,5 @@
 <!-- LOVABLE:END -->
 
 - Game logic lives in src/game as decoupled modules (Grid/Movement/Combat/EnemyAI/Turn/Character/MapRenderer/BattleUI/GridCalibration); no backend — the prototype is client-only by request.
+- Reference-art game windows use CDN-hosted original artwork with proportional accessible controls in a dedicated game UI module to preserve exact visual fidelity without altering combat rules.
+- Prebundle the game dialog dependencies with React and reject outdated Vite dependency requests to prevent mixed React instances during preview updates.
