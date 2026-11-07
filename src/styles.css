@@ -191,27 +191,102 @@
   width: min(1024px, calc(100vw - 16px), calc((100dvh - 16px) * 4 / 3));
   aspect-ratio: 4 / 3; transform: translate(-50%, -50%); outline: none;
 }
-.synergy-art { display: block; width: 100%; height: 100%; user-select: none; }
-.synergy-hotspot {
-  position: absolute; padding: 0; height: auto; border: 0; border-radius: 0;
-  background: transparent; box-shadow: none;
+/* Separate editable HUD layers, with typography and controls rendered by React. */
+:root {
+ --synergy-light: oklch(0.98 0.03 90);
+ --synergy-purple: oklch(0.45 0.12 305);
+ --synergy-red: oklch(0.48 0.16 25);
+ --synergy-glow: 0 0 14px var(--synergy-gold);
 }
-.synergy-hotspot:hover { background: transparent; }
-.synergy-hotspot:focus-visible { outline: 3px solid var(--synergy-gold); outline-offset: -3px; box-shadow: none; }
-.synergy-fire { left: 36%; top: 22%; width: 26%; height: 18%; }
-.synergy-water { left: 52.5%; top: 38%; width: 23%; height: 20%; }
-.synergy-nature { left: 48%; top: 63%; width: 27%; height: 20%; }
-.synergy-earth { left: 14%; top: 63%; width: 26%; height: 20%; }
-.synergy-electric { left: 13%; top: 38%; width: 23%; height: 20%; }
-.synergy-details { left: 21%; top: 86.5%; width: 21%; height: 10%; }
-.synergy-upgrade { left: 42%; top: 86.5%; width: 21%; height: 10%; cursor: not-allowed; }
-.synergy-close { left: 63.5%; top: 86.5%; width: 20%; height: 10%; }
-.synergy-detail-panel {
-  position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
-  width: min(320px, 76%); max-height: 78%; overflow: auto; padding: 12px 16px;
-  background: var(--synergy-paper); color: var(--synergy-ink);
-  border: 4px double var(--synergy-gold); outline: 2px solid var(--synergy-green);
-  box-shadow: var(--synergy-shadow);
-}
+.synergy-window { font-family: var(--font-body); color: var(--synergy-ink); }
+.synergy-frame { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.synergy-title { position: absolute; top: 7%; left: 25%; right: 25%; text-align: center; margin: 0; font-family: Georgia, serif; font-size: 25px; font-weight: 900; color: var(--synergy-light); text-shadow: 2px 2px var(--synergy-ink); line-height: 1.15; }
+.synergy-description { position: absolute; top: 16%; left: 15%; right: 5%; text-align: center; font-size: 17px; margin: 0; line-height: 1; }
+.synergy-tabs { position: absolute; top: 20%; bottom: 22%; left: 1.5%; width: 10%; display: flex; flex-direction: column; gap: 6px; }
+.synergy-tab { flex: 1; min-height: 0; width: 100%; padding: 3px 0; display: flex; flex-direction: column; gap: 0; border: 2px solid var(--synergy-gold); background: var(--synergy-green); color: var(--synergy-light); font-family: var(--font-body); font-size: 17px; line-height: 1; border-radius: 2px; }
+.synergy-tab svg { width: 24px; height: 24px; color: var(--synergy-gold); }
+.synergy-tab:hover, .synergy-tab.is-active { background: var(--synergy-green); box-shadow: inset 0 0 0 2px var(--synergy-gold); color: var(--synergy-light); }
+.synergy-tab.is-active::before { content: '▶'; position: absolute; left: -5px; color: var(--synergy-gold); }
+.synergy-wheel { position: absolute; top: 22%; left: 14%; width: 59%; height: 62%; }
+.synergy-ring { position: absolute; width: 62%; aspect-ratio: 1; left: 18%; top: 22%; border-radius: 50%; border: 4px double var(--synergy-gold); box-shadow: var(--synergy-glow); }
+.synergy-core { position: absolute; width: 25%; height: 31%; object-fit: contain; left: 37%; top: 38%; }
+.synergy-node { position: absolute; display: flex; padding: 0; gap: 0; width: 44%; height: 31%; border-radius: 0; background: transparent; }
+.synergy-node:hover { background: transparent; filter: brightness(1.1); }
+.synergy-node.is-selected img { filter: drop-shadow(0 0 6px var(--synergy-gold)); }
+.synergy-node img { width: 57%; height: 100%; object-fit: contain; }
+.synergy-node-label { display: flex; flex-direction: column; width: 43%; align-items: center; font-size: 17px; line-height: 1.1; }
+.synergy-node-label > span:first-child { display: flex; align-items: center; justify-content: center; gap: 2px; padding: 2px 4px; border: 2px solid var(--synergy-gold); color: var(--synergy-light); background: var(--synergy-green); white-space: nowrap; }
+.synergy-node-label svg { width: 15px; height: 15px; }
+.synergy-node-label b { border: 1px solid var(--synergy-gold); background: var(--synergy-ink); color: var(--synergy-light); padding: 1px 10px; font-weight: normal; }
+.synergy-node-progress { margin-top: 5px; border-bottom: 4px solid var(--synergy-green); min-width: 75%; }
+.node-fire { left: 27%; top: -2%; }
+.node-water { left: 56%; top: 28%; }
+.node-nature { left: 50%; top: 69%; }
+.node-earth { left: -2%; top: 69%; flex-direction: row-reverse; }
+.node-electric { left: -4%; top: 28%; flex-direction: row-reverse; }
+.synergy-summary { position: absolute; top: 23%; right: 4.5%; width: 22%; height: 62%; display: flex; flex-direction: column; gap: 10px; }
+.synergy-summary-section { border: 3px double var(--synergy-gold); outline: 1px solid var(--synergy-green); background: var(--synergy-paper); border-radius: 5px; overflow: hidden; }
+.synergy-summary h2 { margin: 0; display: flex; justify-content: center; align-items: center; gap: 4px; background: var(--synergy-green); color: var(--synergy-light); font-size: 18px; font-weight: normal; line-height: 1.2; }
+.synergy-summary h2 svg { width: 18px; height: 18px; color: var(--synergy-gold); }
+.synergy-summary ul { margin: 0; list-style: none; padding: 3px 7px; }
+.synergy-summary li { display: flex; align-items: center; gap: 5px; font-size: 16px; line-height: 1.25; border-bottom: 1px solid var(--synergy-gold); }
+.synergy-summary li:last-child { border: 0; }
+.synergy-summary li img, .synergy-summary li svg { width: 20px; height: 24px; object-fit: contain; }
+.synergy-summary li b { margin-left: auto; color: var(--synergy-green); white-space: nowrap; }
+.synergy-network-progress { display: flex; gap: 7px; padding: 6px; align-items: center; line-height: 1; }
+.synergy-network-progress progress { width: 75%; height: 13px; accent-color: var(--synergy-green); }
+.synergy-network-icons { display: flex; justify-content: space-around; padding: 2px 6px 5px; color: var(--synergy-green); }
+.synergy-network-icons svg { width: 22px; height: 22px; }
+.synergy-footer { position: absolute; bottom: 5%; left: 21%; right: 17%; height: 9%; display: flex; gap: 7px; }
+.synergy-command { flex: 1; min-width: 0; height: 100%; padding: 2px 8px; gap: 5px; font-family: var(--font-body); font-size: 24px; border: 4px double var(--synergy-light); outline: 2px solid var(--synergy-gold); border-radius: 6px; color: var(--synergy-light); box-shadow: 2px 3px var(--synergy-ink); }
+.synergy-command > span { border: 2px solid currentColor; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.synergy-command svg { width: 23px; height: 23px; }
+.command-details, .command-details:hover { background: var(--synergy-purple); }
+.command-upgrade, .command-upgrade:hover { background: var(--synergy-green); cursor: not-allowed; }
+.command-close, .command-close:hover { background: var(--synergy-red); }
+.synergy-detail-panel { position: absolute; z-index: 2; left: 50%; top: 48%; transform: translate(-50%, -50%); width: min(320px, 76%); max-height: 78%; overflow: auto; padding: 12px 16px; background: var(--synergy-paper); color: var(--synergy-ink); border: 4px double var(--synergy-gold); outline: 2px solid var(--synergy-green); box-shadow: var(--synergy-shadow); }
 .synergy-stats > div { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--synergy-gold); }
 .synergy-stats dd { color: var(--synergy-green); font-weight: bold; }
+.synergy-tab-content { position: absolute; top: 25%; left: 18%; width: 68%; bottom: 17%; overflow: auto; }
+.synergy-tab-content > div { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--synergy-gold); }
+.synergy-tab-content img { width: 50px; height: 50px; object-fit: contain; }
+.synergy-tab-content b { margin-left: auto; }
+@media (max-width: 760px) {
+ .synergy-title { font-size: 18px; }
+ .synergy-description { font-size: 12px; }
+ .synergy-tab { font-size: 13px; }
+ .synergy-tab svg { width: 19px; height: 19px; }
+ .synergy-node-label { font-size: 12px; }
+ .synergy-node-label b { padding: 1px 4px; }
+ .synergy-node-label svg { width: 12px; height: 12px; }
+ .synergy-summary { gap: 7px; }
+ .synergy-summary h2 { font-size: 13px; }
+ .synergy-summary li { font-size: 12px; }
+ .synergy-summary li img, .synergy-summary li svg { width: 14px; height: 17px; }
+ .synergy-summary ul { padding: 2px 4px; }
+ .synergy-command { font-size: 17px; padding: 1px 4px; }
+ .synergy-command > span { width: 19px; height: 19px; }
+ .synergy-command svg { width: 17px; height: 17px; }
+}
+@media (max-width: 480px) {
+ .synergy-window { width: calc(100vw - 12px); height: calc(100dvh - 24px); aspect-ratio: auto; overflow-y: auto; background: var(--synergy-paper); border: 4px double var(--synergy-gold); }
+ .synergy-frame { height: 275px; }
+ .synergy-title { top: 26px; left: 15%; right: 15%; font-size: 17px; }
+ .synergy-description { top: 59px; left: 5%; right: 5%; line-height: 1.1; }
+ .synergy-tabs { top: 86px; left: 3%; right: 3%; width: auto; height: 48px; bottom: auto; flex-direction: row; gap: 2px; }
+ .synergy-tab { font-size: 12px; }
+ .synergy-tab.is-active::before { display: none; }
+ .synergy-wheel { top: 150px; left: 4%; width: 91%; height: 300px; }
+ .synergy-node-label { font-size: 14px; }
+ .synergy-ring { top: 16%; }
+ .synergy-summary { top: 465px; left: 4%; right: 4%; width: auto; height: auto; gap: 8px; padding-bottom: 95px; }
+ .synergy-summary h2 { font-size: 20px; }
+ .synergy-summary li { font-size: 18px; }
+ .synergy-summary li img, .synergy-summary li svg { width: 24px; height: 26px; }
+ .synergy-summary ul { padding: 4px 10px; }
+ .synergy-footer { position: sticky; top: calc(100% - 62px); margin-top: 760px; left: auto; right: auto; bottom: 0; height: 52px; padding: 6px; background: var(--synergy-green); gap: 6px; }
+ .synergy-command { font-size: 17px; }
+ .synergy-command svg { display: none; }
+ .synergy-tab-content { top: 150px; bottom: 100px; }
+ .synergy-detail-panel { position: fixed; top: 45%; font-size: 20px; }
+}
